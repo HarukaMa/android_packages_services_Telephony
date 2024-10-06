@@ -100,6 +100,7 @@ public class TestSatelliteService extends SatelliteImplBase {
     private List<String> mAllPlmnList = new ArrayList<>();
     private boolean mIsSatelliteEnabledForCarrier;
     private boolean mIsRequestIsSatelliteEnabledForCarrier;
+    private boolean mIsEmergnecy;
 
     /**
      * Create TestSatelliteService using the Executor specified for methods being called from
@@ -117,6 +118,7 @@ public class TestSatelliteService extends SatelliteImplBase {
         mIsCellularModemEnabledMode = false;
         mIsSatelliteEnabledForCarrier = false;
         mIsRequestIsSatelliteEnabledForCarrier = false;
+        mIsEmergnecy = false;
     }
 
     /**
@@ -184,8 +186,9 @@ public class TestSatelliteService extends SatelliteImplBase {
 
     @Override
     public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-            @NonNull IIntegerConsumer errorCallback) {
-        logd("requestSatelliteEnabled: mErrorCode=" + mErrorCode + " enable = " + enableSatellite);
+            boolean isEmergency, @NonNull IIntegerConsumer errorCallback) {
+        logd("requestSatelliteEnabled: mErrorCode=" + mErrorCode + " enable = " + enableSatellite
+                + " isEmergency=" + isEmergency);
         if (mErrorCode != SatelliteResult.SATELLITE_RESULT_SUCCESS) {
             runWithExecutor(() -> errorCallback.accept(mErrorCode));
             return;
@@ -196,6 +199,7 @@ public class TestSatelliteService extends SatelliteImplBase {
         } else {
             disableSatellite(errorCallback);
         }
+        mIsEmergnecy = isEmergency;
     }
 
     private void enableSatellite(@NonNull IIntegerConsumer errorCallback) {
@@ -368,22 +372,6 @@ public class TestSatelliteService extends SatelliteImplBase {
             return;
         }
         runWithExecutor(() -> callback.accept(mModemState));
-    }
-
-    @Override
-    public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
-            @NonNull IIntegerConsumer errorCallback, @NonNull IBooleanConsumer callback) {
-        logd("requestIsCommunicationAllowedForCurrentLocation: mErrorCode=" + mErrorCode);
-        if (mErrorCode != SatelliteResult.SATELLITE_RESULT_SUCCESS) {
-            runWithExecutor(() -> errorCallback.accept(mErrorCode));
-            return;
-        }
-
-        if (mIsCommunicationAllowedInLocation) {
-            runWithExecutor(() -> callback.accept(true));
-        } else {
-            runWithExecutor(() -> callback.accept(false));
-        }
     }
 
     @Override
@@ -579,6 +567,10 @@ public class TestSatelliteService extends SatelliteImplBase {
 
     public boolean isRequestIsSatelliteEnabledForCarrier() {
         return mIsRequestIsSatelliteEnabledForCarrier;
+    }
+
+    public boolean getIsEmergency() {
+        return mIsEmergnecy;
     }
 
     /**
